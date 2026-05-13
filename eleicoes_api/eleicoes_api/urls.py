@@ -15,8 +15,34 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
+from urna.views import EleitorViewSet, EleicaoViewSet, CandidatoViewSet, AptidaoEleitorViewSet, VotoViewSet
+
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Eleicoes API",
+        default_version='v1',
+        description="API de votação",
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
+router = DefaultRouter()
+router.register(r'eleitores', EleitorViewSet)
+router.register(r'eleicoes', EleicaoViewSet)
+router.register(r'candidatos', CandidatoViewSet)
+router.register(r'aptidoes-eleitorais', AptidaoEleitorViewSet)
+router.register(r'votos', VotoViewSet, basename='votos')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include(router.urls)),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='redoc'),
 ]
